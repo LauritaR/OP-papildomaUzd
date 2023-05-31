@@ -1,11 +1,5 @@
 #include"fun.h"
 
-bool failasYra(const string& file)
-{
-    ifstream failas(file);
-    return failas.good();
-}
-
 string uzklausa()
 {
     string file;
@@ -16,12 +10,12 @@ string uzklausa()
 }
 
 
-void addWord(const string& w, map<string,zodis>& collection, int eilesIndx)
+void addWord(const string& w, map<string,zodis>& sarasas, int eilesIndx)//funkcija, kuri issaugoja zodzius i map konteineri, jeigu yra jau tai padidina kieki
 {
     if(w.empty()||w=="  "){return; }
 
-    auto iterator=collection.find(w);
-    if(iterator==collection.end()){collection.insert({w,zodis(eilesIndx)});}
+    auto iterator=sarasas.find(w);
+    if(iterator==sarasas.end()){sarasas.insert({w,zodis(eilesIndx)});}
     else{
         if(eilesIndx!=iterator->second.eilesIndx.back())
         {iterator->second.eilesIndx.push_back(eilesIndx);
@@ -32,7 +26,7 @@ void addWord(const string& w, map<string,zodis>& collection, int eilesIndx)
 }
 
 
-stringstream getBuffer(const string& filePath)
+stringstream getBuffer(const string& filePath)//skaito į stringstreamą
 {
     ifstream failas;
 
@@ -48,7 +42,7 @@ stringstream getBuffer(const string& filePath)
     return buffer;
 }
 
-void saveBuffer(const string& filePath, stringstream& buffer)
+void saveBuffer(const string& filePath, stringstream& buffer)//išsaugoja į failą
 {
     ofstream failas;
     failas.open(filePath);
@@ -62,7 +56,7 @@ void saveBuffer(const string& filePath, stringstream& buffer)
     failas.close();
 }
 
-int getDistance (int previous, int current)
+int atstumas (int previous, int current)//fnkcija skaiciuoja atstuma tarp indexu 
 {
     int prevNumDIgits=to_string(previous).length();
     int currentNumDigits=to_string(current).length();
@@ -77,14 +71,14 @@ int getDistance (int previous, int current)
     for(int i=currentNumDigits;i>prevNumDIgits;i--)
     {
         int base=pow(10,i-1);
-        sum+=getDistance(base,current);
+        sum+=atstumas(base,current);
         sum+=(current==base)?i+1:i+2;
         current=base-1;
     }
-        return sum + getDistance(previous,current);
+        return sum + atstumas(previous,current);
 }
 
-void print(map<string, zodis>& collection, int eiliuSK, const string& filePath,const vector<string> &urls) {
+void print(map<string, zodis>& sarasas, int eiliuSK, const string& filePath,const vector<string> &urls) {
     stringstream outputBuffer;
     outputBuffer << left << setw(15) << "žodis "<<right<<setw(10);
     for (int i = 0; i < eiliuSK; i++) {
@@ -94,13 +88,13 @@ void print(map<string, zodis>& collection, int eiliuSK, const string& filePath,c
 
     outputBuffer << string(15 + eiliuSK * 4, '-') << endl;
 
-    for (auto key : collection) {
+    for (auto key : sarasas) {
         if (key.second.cnt > 1) {
             outputBuffer << left << setw(23) << key.first;
             for (int i = 0; i < key.second.eilesIndx.size(); i++) {
                 int prevIndx = (i == 0) ? 0 : key.second.eilesIndx[i - 1] + 1;
                 int lineIndx = key.second.eilesIndx[i] + 1;
-                int dist = getDistance(prevIndx, lineIndx);
+                int dist = atstumas(prevIndx, lineIndx);
                 outputBuffer << string(dist,' ') << "*";
             }
             outputBuffer << endl;
@@ -111,7 +105,7 @@ void print(map<string, zodis>& collection, int eiliuSK, const string& filePath,c
     outputBuffer << left << setw(25) << "žodis" << "kiekis" << endl;
     outputBuffer << string(50, '-') << endl;
 
-    for (auto key : collection) {
+    for (auto key : sarasas) {
         if (key.second.cnt > 1) {
             outputBuffer << left << setw(25) << key.first << right<<key.second.cnt << endl;
         }
